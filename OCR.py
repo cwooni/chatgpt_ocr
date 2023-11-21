@@ -60,9 +60,9 @@ def response(output_text):
         # user_content=input("user : ")
         messages.append({"role": "system", "content": "당신은 초등학교 선생님입니다. 학생들의 일기에 공감하고 적당한 길이의 서로 다른 코멘트 3개를 작성해주세요."})
         messages.append({"role": "user", "content": f"{output_text}"})
-        chat_completion = client.chat.completions.create(model="gpt-3.5-turbo-1106", messages=messages)
+        completion = client.chat.completions.create(model="gpt-3.5-turbo-1106", messages=messages)
         st.subheader("ChatGPT Comments:")
-        st.write(chat_completion.choices[0].message.content.strip())
+        st.write(completion.choices[0].message.content.strip())
 
     else:
         st.write("")
