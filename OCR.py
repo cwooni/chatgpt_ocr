@@ -61,7 +61,7 @@ def response(response):
        
 if __name__ == "__main__":
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"openocr-394310-95d8b763df38.json"
-    client = OpenAI()
+    client = "sk-"st.secrets['client']
     output_text=main()
     messages=[]
     # user_content=input("user : ")
