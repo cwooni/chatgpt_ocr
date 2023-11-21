@@ -1,24 +1,20 @@
-# import easyocr as ocr  #OCR
-import streamlit as st  #Web App
-from PIL import Image #Image Processing
-import numpy as np #Image Processing
-from numpy import asarray
-import os
+import streamlit as st  # Web App
+from PIL import Image  # Image Processing
 from google.cloud import vision_v1
-import torch
-torch.cuda.empty_cache()
+from openai import OpenAI
+import os
+
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 st.set_page_config(page_title="OCR web", layout="wide")
 
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+# title
+st.title("Google Vision OCR and ChatGPT Comments")
 
-
-#title
-st.title("OCR web")
-
-#subtitle
-st.markdown("## Optical Character Recognition - Extract `Text` from  `Images`")
+# subtitle
+st.markdown("## Extract `Text` from  `Images`")
 
 st.markdown("")
+
 
 def extract_text_from_image(image):
     # Instantiates a client
@@ -32,14 +28,12 @@ def extract_text_from_image(image):
     if text_annotations:
         return text_annotations[0].description
     else:
-        return "No text found in the image."
+        return None  # Return None if no text found in the image
+
 
 def main():
-    # st.title("Text Extraction from Image using Google Cloud Vision API")
-    st.write("Upload an image")
-
     # Allow the user to upload an image
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
         # Display the uploaded image
@@ -51,11 +45,31 @@ def main():
         # Perform text extraction
         image = vision_v1.Image(content=content)
         extracted_text = extract_text_from_image(image)
-        print(extracted_text)
-        # Display the extracted text
-        st.subheader("Extracted Text:")
-        st.write(extracted_text)
+
+        return extracted_text
+
+
+def response(output_text):
+    # Display the extracted text
+    
+    if output_text is not None:
+        st.subheader("OCR Result:")
+        st.write(output_text)
+        messages = []
+
+        # user_content=input("user : ")
+        messages.append({"role": "system", "content": "당신은 초등학교 선생님입니다. 학생들의 일기에 공감하고 적당한 길이의 서로 다른 코멘트 3개를 작성해주세요."})
+        messages.append({"role": "user", "content": f"{output_text}"})
+        chat_completion = client.chat.completions.create(model="gpt-3.5-turbo-1106", messages=messages)
+        st.subheader("ChatGPT Comments:")
+        st.write(chat_completion.choices[0].message.content.strip())
+
+    else:
+        st.write("")
 
 if __name__ == "__main__":
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = r"openocr-394310-95d8b763df38.json"
-    main()
+    client = st.secrets['client']
+    output_text = main()
+    response(output_text)
+    
