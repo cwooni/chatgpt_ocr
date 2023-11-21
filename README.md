@@ -1,1 +1,3 @@
-# chatgpt_ocr
+-----
+$ pip install -r requirements.txt
+-----
